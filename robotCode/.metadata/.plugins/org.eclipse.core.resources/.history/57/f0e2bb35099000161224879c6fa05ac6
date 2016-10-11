@@ -1,0 +1,61 @@
+package org.usfirst.frc.team115.robot.commands;
+
+import org.usfirst.frc.team115.robot.Robot;
+
+import edu.wpi.first.wpilibj.command.Command;
+
+public class Drive extends Command {
+	
+	private final double SPEED = 0.5;
+	
+	public Drive() {
+		requires(Robot.driveTrain);
+	}
+	
+	@Override
+	protected void initialize() {
+		
+	}
+
+	@Override
+	protected void execute() {
+		if (Robot.driveTrain.isArduinoEnabled()) {
+			if (Robot.driveTrain.getMove()) {
+				if (Robot.driveTrain.getTurn()) {
+					if (Robot.driveTrain.getDirection()) {
+						Robot.driveTrain.drive(0, SPEED);
+					} else {
+						Robot.driveTrain.drive(0, -SPEED);
+					}
+				} else {
+					if (Robot.driveTrain.getDirection()) {
+						Robot.driveTrain.drive(SPEED, 0);
+					} else {
+						Robot.driveTrain.drive(-SPEED, 0);
+					}
+				}
+			}
+		} else {
+			Robot.driveTrain.drive(Robot.oi.getJoystick());
+		}
+		
+	}
+
+	@Override
+	protected boolean isFinished() {
+		return false;
+	}
+
+	@Override
+	protected void end() {
+		Robot.driveTrain.stop();
+	}
+
+	@Override
+	protected void interrupted() {
+		end();
+		
+	}
+
+}
+

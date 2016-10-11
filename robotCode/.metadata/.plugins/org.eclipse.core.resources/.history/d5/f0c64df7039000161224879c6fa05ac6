@@ -1,0 +1,81 @@
+package org.usfirst.frc.team115.robot.subsystems;
+
+import org.usfirst.frc.team115.robot.RobotMap;
+import org.usfirst.frc.team115.robot.commands.DriveWithArduino;
+import org.usfirst.frc.team115.robot.commands.DriveWithJoystick;
+
+import edu.wpi.first.wpilibj.CANTalon;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.command.Subsystem;
+
+public class DriveTrain extends Subsystem {
+	
+	private CANTalon frontLeft, frontRight, backLeft, backRight;
+	
+	private RobotDrive driveTrain;
+	
+	private DigitalInput move, turn, direction;
+	private DigitalOutput enable;
+	
+	private boolean arduinoEnabled = false;
+	
+	public DriveTrain() {
+		frontLeft = new CANTalon(RobotMap.FRONT_LEFT);
+		frontRight = new CANTalon(RobotMap.FRONT_RIGHT);
+		backLeft = new CANTalon(RobotMap.BACK_LEFT);
+		backRight = new CANTalon(RobotMap.BACK_RIGHT);
+		
+		driveTrain = new RobotDrive(frontLeft, backLeft, frontRight, backRight);
+		
+		enable = new DigitalOutput(RobotMap.ENABLE);
+		move = new DigitalInput(RobotMap.MOVE);
+		turn = new DigitalInput(RobotMap.TURN);
+		direction = new DigitalInput(RobotMap.DIRECTION);
+	}
+	
+	public void enableArduino(boolean enable) {
+		arduinoEnabled = enable;
+		if (enable) {
+			setDefaultCommand(new DriveWithArduino());
+		} else {
+			setDefaultCommand(new DriveWithJoystick());
+		}
+		this.enable.set(enable);
+	}
+	
+	public boolean getMove() {
+		return move.get();
+	}
+	
+	public boolean getTurn() {
+		return turn.get();
+	}
+	
+	public boolean getDirection() {
+		return direction.get();
+	}
+	
+	public void drive(Joystick joystick) {
+		driveTrain.arcadeDrive(joystick);
+	}
+	
+	public void drive(double move, double rotate) {
+		driveTrain.arcadeDrive(move, rotate);
+	}
+	
+	public void stop() {
+		drive(0,0);
+	}
+	
+
+	@Override
+	protected void initDefaultCommand() {
+		setDefaultCommand(new DriveWithJoystick());
+	}
+
+}
+

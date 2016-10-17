@@ -127,6 +127,7 @@ void doHeartbeat()
 // the desired range.
 void verifyMotorSpeed(uint16_t motorRPM)
 {
+  // Change the '0' to '1' in the next line to see the motor RPM
   if (0 && (motorRPM < MOTOR_MIN_RPM || motorRPM > MOTOR_MAX_RPM)) {
     Serial.print(motorRPM);
     Serial.print("   ");

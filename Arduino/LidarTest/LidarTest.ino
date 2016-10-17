@@ -57,7 +57,7 @@ void setup() {
 
 // Anything you put in loop() is run over and over again
 void loop() {
-  static int offset = 0;          // Offset into the packet being read
+  static uint8_t offset = 0;          // Offset into the packet being read
   static uint16_t distance[360];  // Array storing the distance for every degree
   struct reading degreeData;      // Structure holding data for each degree
 
@@ -93,18 +93,20 @@ void loop() {
   verifyMotorSpeed(processSpeed(ptr[2], ptr[3]));
 
   // Determine which degree of direction this data is for
-  uint8_t degree = (packet.index - 0xA0) << 2;
+  uint16_t degree = (packet.index - 0xA0) << 2;
   
   // Adjust this bearing because the LIDAR might not be mounted straight
   degree = (degree + DEGREE_OFFSET) % 360;
 
   // Each packet contains data for 4 degrees
-  for (int i=0; i<4; i++, degree++) {
+  for (uint8_t i=0; i<4; i++, degree++) {
     // Convert the data to a format we can understand
     interpretData(packet.data[i], &degreeData);
 
     // Store the distance information
-    distance[degree] = degreeData.distance;
+    // Adjust the angle so that points to the right are 0 degrees and increasing, and
+    // points to the left are 359 degrees and decreasing.
+    distance[359 - degree] = degreeData.distance;
 
     // Display some information every rotation
     if (degree == 0) {
@@ -130,7 +132,7 @@ void loop() {
         uint16_t closestAngle;
         
         // Look at all the stored readings to figure out which one is closest
-        for (int i=0; i< 360; i++) {
+        for (uint16_t i=0; i< 360; i++) {
           // If the distance is very small then it is an error.  Ignore it
           if (distance[i] < 100)
             continue;
@@ -193,7 +195,7 @@ void moveRobot(uint8_t movement)
   // Stop the robot from moving.  It is important to do this first!
   digitalWrite(PIN_MOVE, LOW);
   
-  // If the robot is not enabled then ignore this instruction
+  // If the robot is not enabled then ignore this move instruction
   if (isEnabled() == false)
     return;
   

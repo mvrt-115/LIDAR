@@ -110,47 +110,45 @@ void loop() {
 
     // Display some information every rotation
     if (degree == 0) {
-      // Is there a jumper between the debug pin and ground?
-      if (digitalRead(PIN_DEBUG) == HIGH) {
-        // Display the information for just zero degrees
-        Serial.print("Distance=");
-        if (!degreeData.isValid) {
-          Serial.print("Error:");
-          Serial.print(degreeData.distance);
-        }
-        else {
-          Serial.print(degreeData.distance);
-          Serial.print("mm  ");
-        }
-        Serial.print("\tStrength=");
-        Serial.println(degreeData.signalStrength);
-      }
-      else
-      {
-        // Figure out where the closest object is
-        uint16_t closestDistance = 0xFFFF;
-        uint16_t closestAngle;
+      // Figure out where the closest object is
+      uint16_t closestDistance = 0xFFFF;
+      uint16_t closestAngle;
         
-        // Look at all the stored readings to figure out which one is closest
-        for (uint16_t i=0; i< 360; i++) {
-          // If the distance is very small then it is an error.  Ignore it
-          if (distance[i] < 100)
-            continue;
+      // Look at all the stored readings to figure out which one is closest
+      for (uint16_t i=0; i< 360; i++) {
+        // If the distance is very small then it is an error.  Ignore it
+        if (distance[i] < 100)
+          continue;
  
-          // Is this reading further than the one we've found so far?
-          if (distance[i] >= closestDistance)
-            continue;
-          // Yay!  This reading is the current closest :-)
-          closestDistance = distance[i];
-          closestAngle = i;
-        }
-        // Now that the closest object has been found display the information
-        Serial.print("Closest point is ");
-        Serial.print(closestDistance);
-        Serial.print("mm away at ");
-        Serial.print(closestAngle);
-        Serial.println(" degrees");
+        // Is this reading further than the one we've found so far?
+        if (distance[i] >= closestDistance)
+          continue;
+        // Yay!  This reading is the current closest :-)
+        closestDistance = distance[i];
+        closestAngle = i;
       }
+      // Now that the closest object has been found try to face it and be 3 feet away from it
+      // First priority is to face the closest object (the puppy's owner)
+      // To prevent oscillation around 0 degrees we check for < 250 degrees and > 10 degrees
+      // Turn counter-clockwise if the owner is on the left
+      if (closestAngle < 350 && closestAngle > 180)
+        moveRobot(MOVE_TURN_CCW);
+      // Turn clockwise if the owner is on the right
+      else if (closestAngle > 10 && closestAngle >= 180)
+        moveRobot(MOVE_TURN_CLOCKWISE);
+
+      // If the puppy is facing its owner then move forward or backward until 3 feet away
+      // We add an error margin to prevent oscillation around the 3' mark
+      // 3'1" = 37 inches = 940mm
+      else if (closestDistance > 940)
+        moveRobot(MOVE_FORWARD);
+      // 2'11" = 35 inches = 889mm
+      else if (closestDistance < 889)
+        moveRobot(MOVE_BACKWARDS);
+
+      // And now the most important part!!  Make it stop!
+      else
+        moveRobot(MOVE_STOP);
     } 
   } // End processing 4 degrees 
 }
@@ -207,21 +205,25 @@ void moveRobot(uint8_t movement)
       digitalWrite(PIN_TURN, LOW);
       digitalWrite(PIN_FORWARD_CW, HIGH);
       digitalWrite(PIN_MOVE, HIGH);
+      Serial.println("\t\tFORWARD");
       break;
     case  MOVE_BACKWARDS:
       digitalWrite(PIN_TURN, LOW);
       digitalWrite(PIN_FORWARD_CW, LOW);
       digitalWrite(PIN_MOVE, HIGH);
+      Serial.println("\t\tBACKWARDS");
       break;
     case  MOVE_TURN_CLOCKWISE:
       digitalWrite(PIN_TURN, HIGH);
       digitalWrite(PIN_FORWARD_CW, HIGH);
       digitalWrite(PIN_MOVE, HIGH);
+      Serial.println("\t\t\t\tclockwise");
       break;
     case  MOVE_TURN_CCW:
       digitalWrite(PIN_TURN, HIGH);
       digitalWrite(PIN_FORWARD_CW, LOW);
       digitalWrite(PIN_MOVE, HIGH);
+      Serial.println("counter-clockwise");
       break;
   }
 }

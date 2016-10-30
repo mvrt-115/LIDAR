@@ -134,16 +134,16 @@ void loop() {
       if (closestAngle < 350 && closestAngle > 180)
         moveRobot(MOVE_TURN_CCW);
       // Turn clockwise if the owner is on the right
-      else if (closestAngle > 10 && closestAngle >= 180)
+      else if (closestAngle > 10 && closestAngle <= 180)
         moveRobot(MOVE_TURN_CLOCKWISE);
 
       // If the puppy is facing its owner then move forward or backward until 3 feet away
       // We add an error margin to prevent oscillation around the 3' mark
-      // 3'1" = 37 inches = 940mm
-      else if (closestDistance > 940)
+      // 3'2" = 38 inches = 965mm
+      else if (closestDistance > 965)
         moveRobot(MOVE_FORWARD);
-      // 2'11" = 35 inches = 889mm
-      else if (closestDistance < 889)
+      // 2'10" = 34 inches = 864mm
+      else if (closestDistance < 864)
         moveRobot(MOVE_BACKWARDS);
 
       // And now the most important part!!  Make it stop!

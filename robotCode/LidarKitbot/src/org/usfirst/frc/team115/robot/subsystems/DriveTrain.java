@@ -4,6 +4,7 @@ import org.usfirst.frc.team115.robot.RobotMap;
 import org.usfirst.frc.team115.robot.commands.Drive;
 
 import edu.wpi.first.wpilibj.CANTalon;
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Joystick;
@@ -24,11 +25,17 @@ public class DriveTrain extends Subsystem {
 	private RobotDrive driveTrain;
 	
 	// Create the input for moving, turning, and the direction
-	private DigitalInput move, turn, direction;
+	private DigitalInput move, turn, direction, shoot;
 	// Create the output for enabling the Arduino
-	private DigitalOutput enable;
+	private DigitalOutput enable, flashlight;
 	
 	private boolean arduinoEnabled = false;
+	
+
+	private Counter count;
+	private double ARDUINO_MAX_PULSE = 100;
+	
+
 	
 	/**
 	 * Constructor for the DriveTrain. Instantiates all the objects associated with the drive train.
@@ -45,12 +52,18 @@ public class DriveTrain extends Subsystem {
 		// Order of the motor controllers does matter
 		driveTrain = new RobotDrive(frontLeft, backLeft, frontRight, backRight);
 		
+		// create counter to detect speed
+		count = new Counter();
+		count.setUpSource(RobotMap.COUNTER);
+		
 		// Create the inputs and outputs. RobotMap.<name> is the RoboRIO pin number the output/input is attached to
 		// If you go to RobotMap.java, you can see the pin numbers
 		enable = new DigitalOutput(RobotMap.ENABLE);
 		move = new DigitalInput(RobotMap.MOVE);
 		turn = new DigitalInput(RobotMap.TURN);
 		direction = new DigitalInput(RobotMap.DIRECTION);
+		shoot = new DigitalInput(RobotMap.FIRE);
+		flashlight = new DigitalOutput(RobotMap.FLASHLIGHT);
 	}
 	
 	/**
@@ -65,6 +78,37 @@ public class DriveTrain extends Subsystem {
 	public boolean isArduinoEnabled() {
 		return arduinoEnabled;
 	}
+	
+	// this should be in a different subsystem, but it's 5am and I need to study for stats
+	// should work fine
+	public boolean getShoot() {
+		return shoot.get();
+	}
+
+	public void shootLight(boolean enable) {
+		flashlight.set(enable);
+	}
+	
+	public double getSpeedScalar() {
+		int ticks = count.get();
+		double speed = 0.0;
+		speed = ticks / ARDUINO_MAX_PULSE + 0.35; // the pulses may have to change, this is the maximum number of pulse per cycle (20ms) that the arduino will send
+		count.reset();
+		if (speed > 0.85) {
+			speed = 0.85;
+		}
+		if (speed < 0.35) {
+			speed = 0.35;
+		}
+		return speed;
+	}
+	
+	public void resetCount() {
+		count.reset();
+	}
+
+
+
 	
 	/**
 	 * @return							Return the value of move (high or low)
@@ -119,4 +163,6 @@ public class DriveTrain extends Subsystem {
 	}
 
 }
+
+
 

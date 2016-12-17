@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.command.Command;
 
 public class Drive extends Command {
 	
-	private final double SPEED = 0.85; // Automatic speed for driving using the Arduino
+	private final double SPEED = 1; // Automatic speed for driving using the Arduino
 	
 	public Drive() {
 		requires(Robot.driveTrain); // always requires requires() in the constructor for the command. Tells the command what subsystem it is using.
@@ -21,6 +21,7 @@ public class Drive extends Command {
 	protected void execute() {
 		if (Robot.driveTrain.isArduinoEnabled()) { // if the Arduino is enabled
 			double speed = Robot.driveTrain.getSpeedScalar();
+			SmartDashboard.putNumber("Speed", speed);
 			if (Robot.driveTrain.getMove()) { // if Move is true
 				if (Robot.driveTrain.getTurn()) { // it turn is true
 					if (Robot.driveTrain.getDirection()) { // if the direction is high (true)

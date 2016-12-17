@@ -33,7 +33,7 @@ public class DriveTrain extends Subsystem {
 	
 
 	private Counter count;
-	private double ARDUINO_PULSE_CYCLE = 100;
+	private double ARDUINO_MAX_PULSE = 100;
 	
 
 	
@@ -54,8 +54,7 @@ public class DriveTrain extends Subsystem {
 		
 		// create counter to detect speed
 		count = new Counter();
-		count.setUpSource(move);
-		count.setDistancePerPulse(1);
+		count.setUpSource(RobotMap.COUNTER);
 		
 		// Create the inputs and outputs. RobotMap.<name> is the RoboRIO pin number the output/input is attached to
 		// If you go to RobotMap.java, you can see the pin numbers
@@ -63,8 +62,8 @@ public class DriveTrain extends Subsystem {
 		move = new DigitalInput(RobotMap.MOVE);
 		turn = new DigitalInput(RobotMap.TURN);
 		direction = new DigitalInput(RobotMap.DIRECTION);
-		shoot = new DigitalInput(5);
-		flashlight = new DigitalOutput(9);
+		shoot = new DigitalInput(RobotMap.FIRE);
+		flashlight = new DigitalOutput(RobotMap.FLASHLIGHT);
 	}
 	
 	/**
@@ -91,12 +90,15 @@ public class DriveTrain extends Subsystem {
 	}
 	
 	public double getSpeedScalar() {
-		double speed = count.getRate() * 1000 / ARDUINO_PULSE_CYCLE; // this may need to change
-		if (speed > 1) {
-			speed = 1;
+		int ticks = count.get();
+		double speed = 0.0;
+		speed = ticks / ARDUINO_MAX_PULSE + 0.35; // the pulses may have to change, this is the maximum number of pulse per cycle (20ms) that the arduino will send
+		count.reset();
+		if (speed > 0.85) {
+			speed = 0.85;
 		}
-		if (speed < 0.35/0.85) {
-			speed = 0.35/0.85;
+		if (speed < 0.35) {
+			speed = 0.35;
 		}
 		return speed;
 	}

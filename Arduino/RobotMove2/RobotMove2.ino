@@ -20,7 +20,7 @@ void setup() {
     delay(10000);
 
   // Initialize the timer that controls movement
-  initializeTimer();
+  initializeTimer3();
 }
 
 

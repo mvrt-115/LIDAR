@@ -18,6 +18,8 @@ public class RobotMap {
     public static final int TURN = 2;
     public static final int DIRECTION = 3;
     public static final int FIRE = 4;
+    public static final int COUNTER = 5;
+    public static final int FLASHLIGHT = 9;
     
     // Joystick
     public static final int JOYSTICK = 0;

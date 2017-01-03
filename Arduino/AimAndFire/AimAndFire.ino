@@ -113,31 +113,30 @@ void loop() {
 
     // Display some information every rotation
     if (degree == 0) {
-        // Figure out where the closest object is
-        uint16_t closestDistance = 0xFFFF;
-        uint16_t closestAngle;
+      // Figure out where the closest object is
+      uint32_t closestDistance = 0xFFFFFFFF;
+      uint32_t closestAngle = 0;
         
-        // Look at all the stored readings to figure out which one is closest
-        for (uint16_t i=0; i< 360; i++) {
-          // If the distance is very small then it is an error.  Ignore it
-          if (distance[i] < 100)
-            continue;
+      // Look at all the stored readings to figure out which one is closest
+      for (uint16_t i=0; i< 360; i++) {
+        // If the distance is very small then it is an error.  Ignore it
+        if (distance[i] < 100)
+          continue;
  
-          // Is this reading further than the one we've found so far?
-          if (distance[i] >= closestDistance)
-            continue;
-          // Yay!  This reading is the current closest :-)
-          closestDistance = distance[i];
-          closestAngle = i;
-        }
-        // Now that the closest object has been found display the information
-        Serial.print("Closest point is ");
-        Serial.print(closestDistance);
-        Serial.print("mm away at ");
-        Serial.print(closestAngle);
-        Serial.println(" degrees");
+        // Is this reading further than the one we've found so far?
+        if (distance[i] >= closestDistance)
+          continue;
+        // Yay!  This reading is the current closest :-)
+        closestDistance = distance[i];
+        closestAngle = i;
       }
-    
+      // Now that the closest object has been found display the information
+      Serial.print("Closest point is ");
+      Serial.print(closestDistance);
+      Serial.print("mm away at ");
+      Serial.print(closestAngle);
+      Serial.println(" degrees");
+    }
   } // End processing 4 degrees 
 }
 

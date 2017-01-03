@@ -26,7 +26,7 @@ void initializeTimer3(void) {
   TCCR3B = _BV(WGM32) + _BV(CS31);     // Timer 3 CTC mode, prescaler is 8
   TCNT3 = 0;                           // Clear the timer count 
   OCR3A = 40000;                       // Set compare match so the interrupt occurs 50 times per second
-  OCR3B = 1000;                        // The pulse width is always 1000/40000*20ms = 0.5ms
+  OCR3B = 200;                         // The pulse width is always 1000/40000*20ms = 0.5ms
   TIMSK3 |= _BV(OCIE3A);               // Enable timer compare interrupt
   TIMSK3 |= _BV(OCIE3B);               // Enable the timer compare interrupt for motor motion
   sei();                               // Enable global interrupts
@@ -69,7 +69,7 @@ void setPowerLevel(uint8_t powerPercentage)
   if (powerPercentage == 0)
     OCR3A = 40000;
   else
-    OCR3A = 40000 / powerPercentage * 10; 
+    OCR3A = 40000 / powerPercentage; 
 
   // Restart the interrupt counter
   TCNT1 = 0;

@@ -112,8 +112,8 @@ void loop() {
     // Display some information every rotation
     if (degree == 0) {
       // Figure out where the closest object is
-      uint16_t closestDistance = 0xFFFF;
-      uint16_t closestAngle;
+      uint32_t closestDistance = 0xFFFFFFFF;
+      uint32_t closestAngle = 0;
         
       // Look at all the stored readings to figure out which one is closest
       for (uint16_t i=0; i< 360; i++) {
@@ -128,24 +128,30 @@ void loop() {
         closestDistance = distance[i];
         closestAngle = i;
       }
+        Serial.print("Closest point is ");
+        Serial.print(closestDistance);
+        Serial.print("mm away at ");
+        Serial.print(closestAngle);
+        Serial.println(" degrees");
+
       // Now that the closest object has been found try to face it and be 3 feet away from it
       // First priority is to face the closest object (the puppy's owner)
       // To prevent oscillation around 0 degrees we check for < 250 degrees and > 10 degrees
       // Turn counter-clockwise if the owner is on the left
-      if (closestAngle < 350 && closestAngle > 180)
-        moveRobot(MOVE_TURN_CCW);
+      if (closestAngle < 345 && closestAngle > 180)
+        moveRobot(MOVE_TURN_CCW, (360 - closestAngle) * 100 / 360);
       // Turn clockwise if the owner is on the right
-      else if (closestAngle > 10 && closestAngle <= 180)
-        moveRobot(MOVE_TURN_CLOCKWISE);
+      else if (closestAngle > 15 && closestAngle <= 180)
+        moveRobot(MOVE_TURN_CLOCKWISE, (closestAngle) * 100 / 360);
 
       // If the puppy is facing its owner then move forward or backward until 3 feet away
       // We add an error margin to prevent oscillation around the 3' mark
       // 3'2" = 38 inches = 965mm
       else if (closestDistance > 965)
-        moveRobot(MOVE_FORWARD);
+        moveRobot(MOVE_FORWARD, closestDistance / 100);
       // 2'10" = 34 inches = 864mm
       else if (closestDistance < 864)
-        moveRobot(MOVE_BACKWARDS);
+        moveRobot(MOVE_BACKWARDS, (1000 - closestDistance) / 80);
 
       // And now the most important part!!  Make it stop!
       else
